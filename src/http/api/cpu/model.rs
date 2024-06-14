@@ -46,7 +46,11 @@ impl Cpu {
         Ok(output) => {
           let default = 0.0;
           if let Ok(result) = String::from_utf8(output.stdout) {
-            let temp = result.replace("'C\n", "").parse::<f32>().unwrap_or(0.0);
+            let temp = result.split('=').last()
+            .unwrap_or("0.0")
+            .replace("'C\n", "")
+            .parse::<f32>()
+            .unwrap_or(0.0);
             return temp;
           }
           return default;

@@ -45,7 +45,9 @@ impl Cpu {
     .arg("measure_temp")
     .output() {
         Ok(output) => {
-          let str = String::from_utf8(output.stdout).unwrap_or(String::from("temp=0.0"));
+          println!("Here");
+          let str = String::from_utf8(output.stdout).unwrap();
+          println!("{str}");
           let temp: f32 = str.split("=").last().unwrap_or("0.0").parse().unwrap_or(0.0);
           return temp
         },

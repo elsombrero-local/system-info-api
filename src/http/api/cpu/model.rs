@@ -16,7 +16,7 @@ pub struct Cpu {
   usage: f32,
   brand: String,
   cpus: Vec<Core>,
-  temperature: String,
+  temperature: f32,
 }
 
 impl Cpu {
@@ -39,18 +39,21 @@ impl Cpu {
   }
 
   // Only available in Pi OS
-  fn get_temperature() -> String {
+  fn get_temperature() -> f32 {
     match Command::new("vcgencmd")
     .arg("measure_temp")
     .output() {
         Ok(output) => {
-          let default = String::from("temp=0.0'C");
-          let str = String::from_utf8(output.stdout).unwrap_or(default.to_owned());
-          str.split('=').last().unwrap_or(default.as_str()).to_string()
+          let default = 0.0;
+          if let Ok(result) = String::from_utf8(output.stdout) {
+            let temp = result.replace("'C\n", "").parse::<f32>().unwrap_or(0.0);
+            return temp;
+          }
+          return default;
         },
         Err(err) => {
           dbg!(err);
-          String::from("0.0'C")
+          return 0.0
         }
     }
   }

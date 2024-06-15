@@ -53,12 +53,9 @@ impl Cpu {
             .unwrap_or(0.0);
             return temp;
           }
-          return default;
+          default
         },
-        Err(err) => {
-          dbg!(err);
-          return 0.0
-        }
+        Err(_) => 0.0
     }
   }
 }

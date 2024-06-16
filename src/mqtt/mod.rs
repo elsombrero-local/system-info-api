@@ -6,9 +6,12 @@ use chrono::Utc;
 
 type TaskFunction = fn(sys: &mut System, disks: &mut Disks, client: &mut Client);
 
+pub mod task;
+
 pub fn init_mqtt(host: String, port: u16, username: String, password: String) -> (Client, Connection) {
-  let mut options = MqttOptions::new("rumqtt-sync", host, port);
+  let mut options = MqttOptions::new("rumqtt-client", host, port);
   options.set_credentials(username, password);
+  options.set_max_packet_size(100000, 100000);
   Client::new(options, 10)
 }
 

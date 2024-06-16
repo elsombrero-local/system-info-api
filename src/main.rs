@@ -1,8 +1,8 @@
 use std::env;
 
-use http::{api::{self, process::model::get_all_processes, system_information::model::SystemInformation}, health};
-use rocket::{futures::lock::Mutex, launch, routes, serde::json};
-use rumqttc::QoS;
+use http::{api, health};
+use mqtt::task;
+use rocket::{futures::lock::Mutex, launch, routes};
 use sysinfo::{Disks, System};
 
 mod http;
@@ -26,17 +26,7 @@ fn rocket() -> _ {
     .manage(sys)
     .manage(disks);
 
-    mqtt::execute(
-        env::var("CRON_EXPRESSION").unwrap_or_default(), 
-        |sys, disks, client| {
-            sys.refresh_all();
-            disks.refresh_list();
-            let si = SystemInformation::new(sys, disks);
-            let processes = get_all_processes(sys.processes());
-            let _ = client.publish("rasp/stats", QoS::AtMostOnce, false, json::to_string(&si).unwrap_or_default());
-            let _ = client.publish("rasp/processes", QoS::AtMostOnce, false, json::to_string(&processes).unwrap_or_default());
-        }
-    );
+    mqtt::execute(env::var("CRON_EXPRESSION").unwrap_or_default(), task::run);
 
     app
 }
